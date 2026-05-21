@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>اربح بدون ايداع - Lucky Streak</title>
     <style>
-        /* تصميم الخلفية النارية العامة */
         body {
             background: radial-gradient(circle, #4a0000 0%, #150000 100%);
             color: white;
@@ -18,20 +17,17 @@
             overflow-x: hidden;
         }
 
-        /* حاوية اللعبة الشاشة الكاملة المحاكية للموبايل بالعرض */
         .game-screen {
             width: 100%;
-            max-width: 480px; /* تصميم طولي متناسق مع الموبايل وبداخله السلوت العريض */
+            max-width: 480px; 
             background: #000;
-            border: 4px solid #3a0000;
+            border: 4px solid #333;
             border-radius: 20px;
             padding: 15px;
             box-shadow: 0 0 30px rgba(255, 61, 0, 0.4);
             position: relative;
-            background-image: linear-gradient(to bottom, rgba(0,0,0,0.8), rgba(40,0,0,0.6)), url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M50 15 C30 40 30 60 50 95 C70 60 70 40 50 15 Z" fill="%23ff3d00" opacity="0.05"/></svg>');
         }
 
-        /* الشريط العلوي للرصيد */
         .top-navbar {
             display: flex;
             justify-content: space-between;
@@ -70,7 +66,6 @@
             cursor: pointer;
         }
 
-        /* ماكينة السلوت - الإطار الذهبي الناري */
         .slot-machine-frame {
             border: 4px solid #ff9800;
             border-radius: 12px;
@@ -84,10 +79,9 @@
             position: relative;
         }
 
-        /* البكرات الـ 5 */
         .reel {
             flex: 1;
-            height: 240px; /* يعرض 4 صفوف (كل صف 60px) */
+            height: 240px; 
             background: linear-gradient(180deg, #151515 0%, #050505 50%, #151515 100%);
             border-radius: 4px;
             overflow: hidden;
@@ -104,14 +98,12 @@
             flex-direction: column;
         }
 
-        /* الرموز والـ 7️⃣ النارية */
         .symbol {
             height: 60px;
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: 2em;
-            text-shadow: 0 0 8px rgba(255,255,255,0.5);
             box-sizing: border-box;
             border-bottom: 1px solid rgba(255,255,255,0.02);
         }
@@ -119,15 +111,13 @@
         .symbol.seven {
             color: #ff3d00;
             font-weight: bold;
-            text-shadow: 0 0 10px #ff3d00, 0 0 5px #ffd700;
-            animation: pulse 1s infinite alternate;
+            text-shadow: 0 0 15px #ff3d00, 0 0 5px #ffd700;
+            animation: pulse 0.5s infinite alternate;
+        }
+        .symbol.diamond {
+            text-shadow: 0 0 15px #00e5ff;
         }
 
-        .blur-motion {
-            filter: blur(2px);
-        }
-
-        /* شريط التحكم السفلي والأزرار */
         .controls-panel {
             display: flex;
             flex-direction: column;
@@ -136,7 +126,6 @@
             gap: 15px;
         }
 
-        /* زر SPIN الدائري الكبير الاحترافي */
         .spin-outer-ring {
             width: 90px;
             height: 90px;
@@ -147,7 +136,7 @@
             align-items: center;
             box-shadow: 0 0 20px #ff3d00, 0 5px 15px rgba(0,0,0,0.5);
             cursor: pointer;
-            transition: transform 0.1s, filter 0.2s;
+            transition: transform 0.1s;
         }
         .spin-outer-ring:active {
             transform: scale(0.95);
@@ -163,9 +152,7 @@
             align-items: center;
             font-weight: bold;
             font-size: 1.1em;
-            letter-spacing: 1px;
             border: 3px solid #111;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
         }
         
         .disabled-spin {
@@ -178,7 +165,6 @@
             color: #555;
         }
 
-        /* لوحة البيانات السفلية المتكاملة */
         .bottom-info-bar {
             width: 100%;
             background: rgba(0,0,0,0.6);
@@ -202,12 +188,12 @@
             font-size: 1.1em;
             margin-top: 5px;
         }
-        .win-text { color: #4caf50; text-shadow: 0 0 10px rgba(76,175,80,0.5); }
+        .win-text { color: #4caf50; text-shadow: 0 0 10px rgba(76,175,80,0.8); font-size: 1.2em; }
         .loss-text { color: #f44336; }
 
         @keyframes pulse {
             from { transform: scale(1); }
-            to { transform: scale(1.08); }
+            to { transform: scale(1.12); }
         }
     </style>
 </head>
@@ -231,7 +217,7 @@
             <div class="reel"><div class="symbols-strip" id="strip5"></div></div>
         </div>
 
-        <div id="message-display">تحجّج بحظك واضغط لتدوير النار!</div>
+        <div id="message-display">اضغط لتدوير بكرات الحظ الصافية!</div>
 
         <div class="controls-panel">
             <div class="spin-outer-ring" id="spin-btn-container" onclick="startSpin()">
@@ -247,49 +233,82 @@
     </div>
 
     <script>
-        // الرموز الفاخرة؛ الـ 7️⃣ هي رمز الجائزة الكبرى
-        const SYMBOLS_POOL = ['🔥7', '🍒', '🍋', '🍊', '🍇', '💎', '💰', 'WILD'];
+        const SYMBOLS_POOL = ['🔥7', '💎', '💰', 'WILD', '🍒', '🍇', '🍊'];
         const SPIN_COST = 10;
-        const SINGLE_HEIGHT = 60; // ارتفاع الرمز بالبكسل
-        const VISIBLE_ROWS = 4;   // عدد الصفوف الظاهرة
-        const STRIP_ITEMS_COUNT = 30; // طول شريط الأنيميشن
+        const SINGLE_HEIGHT = 60; 
+        const VISIBLE_ROWS = 4;   
+        const STRIP_ITEMS_COUNT = 30; 
 
         let currentBalance = 1000;
         let runningSpin = false;
+        let audioCtx = null; // سيتم تفعيله مع أول ضغطة للاعب لالتزام الأمان ببعض المتصفحات
+        let spinSoundInterval = null;
 
         const balanceDisplay = document.getElementById('user-balance');
         const messageDisplay = document.getElementById('message-display');
         const spinButtonContainer = document.getElementById('spin-btn-container');
 
-        // دالة لإنشاء شريط الرموز الممتد عمودياً لكل بكرة
+        // دالة لتوليد صوت تكتكة تدوير البكرات
+        function playTickSound() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(350, audioCtx.currentTime + 0.05);
+            
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.06);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.06);
+        }
+
+        // دالة لتوليد موسيقى الفوز الاحتفالية السلسة
+        function playWinMelody() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            // نغمات متتالية سريعة ومتناسقة تعطي شعور الفوز بالآركيد
+            const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50]; 
+            notes.forEach((freq, index) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime + (index * 0.08));
+                
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime + (index * 0.08));
+                gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + (index * 0.08) + 0.3);
+                
+                osc.start(audioCtx.currentTime + (index * 0.08));
+                osc.stop(audioCtx.currentTime + (index * 0.08) + 0.3);
+            });
+        }
+
         function generateReelStrip(targetStrip, finalFourSymbols) {
             let html = '';
-            // نملأ أول الشريط برموز عشوائية للحركة السريعة
             for (let i = 0; i < STRIP_ITEMS_COUNT - VISIBLE_ROWS; i++) {
                 const randSym = SYMBOLS_POOL[Math.floor(Math.random() * SYMBOLS_POOL.length)];
-                if (randSym === '🔥7') {
-                    html += `<div class="symbol seven">7</div>`;
-                } else {
-                    html += `<div class="symbol">${randSym}</div>`;
-                }
+                if (randSym === '🔥7') html += `<div class="symbol seven">7</div>`;
+                else if (randSym === '💎') html += `<div class="symbol diamond">💎</div>`;
+                else html += `<div class="symbol">${randSym}</div>`;
             }
-            // نضع الـ 4 رموز النهائية المستهدفة في آخر الشريط
             finalFourSymbols.forEach(sym => {
-                if (sym === '🔥7') {
-                    html += `<div class="symbol seven">7</div>`;
-                } else {
-                    html += `<div class="symbol">${sym}</div>`;
-                }
+                if (sym === '🔥7') html += `<div class="symbol seven">7</div>`;
+                else if (sym === '💎') html += `<div class="symbol diamond">💎</div>`;
+                else html += `<div class="symbol">${sym}</div>`;
             });
             targetStrip.innerHTML = html;
         }
 
-        // تهيئة البكرات الـ 5 عند فتح الصفحة بأشكال افتراضية ثابته
         function initSlotMachine() {
             for (let r = 1; r <= 5; r++) {
                 const stripElement = document.getElementById(`strip${r}`);
-                const defaultSymbols = ['🔥7', '🍒', '🍋', '🍊'];
-                generateReelStrip(stripElement, defaultSymbols);
+                generateReelStrip(stripElement, ['🔥7', '💎', '💰', '🍒']);
                 stripElement.style.transform = 'translateY(0px)';
             }
         }
@@ -303,90 +322,98 @@
                 return;
             }
 
-            // سحب الرصيد وتحديث الواجهة وقفل الزر
             runningSpin = true;
             currentBalance -= SPIN_COST;
             balanceDisplay.textContent = currentBalance;
             spinButtonContainer.classList.add('disabled-spin');
-            messageDisplay.textContent = "جاري تدوير بكرات الحظ... 🔥";
+            messageDisplay.textContent = "جاري البحث عن السبعات والجواهر... 🔥";
             messageDisplay.className = '';
 
-            // مصفوفة لحفظ النواتج النهائية الـ 4 لكل بكرة من البكرات الـ 5
+            // تفعيل صوت التكتكة المتتالي السريع أثناء دوران البكرات
+            spinSoundInterval = setInterval(playTickSound, 90);
+
+            const isForcedWin = Math.random() < 0.60; 
+            const winningHighSymbols = ['🔥7', '💎', '💰', 'WILD'];
+            const luckySymbol = winningHighSymbols[Math.floor(Math.random() * winningHighSymbols.length)];
+            const targetWinRow = Math.floor(Math.random() * VISIBLE_ROWS); 
+
             const finalGridResults = [];
 
             for (let r = 1; r <= 5; r++) {
                 const stripElement = document.getElementById(`strip${r}`);
                 
-                // صيانة المسار وتصفير الأنيميشن فوراً بدون تأثير بصري متأخر
                 stripElement.style.transition = 'none';
                 stripElement.style.transform = 'translateY(0px)';
 
-                // اختيار 4 رموز عشوائية نهائية لهذه البكرة
                 const reelFinalSymbols = [];
                 for (let row = 0; row < VISIBLE_ROWS; row++) {
-                    reelFinalSymbols.push(SYMBOLS_POOL[Math.floor(Math.random() * SYMBOLS_POOL.length)]);
+                    if (isForcedWin && row === targetWinRow) {
+                        reelFinalSymbols.push(luckySymbol); 
+                    } else {
+                        reelFinalSymbols.push(SYMBOLS_POOL[Math.floor(Math.random() * SYMBOLS_POOL.length)]);
+                    }
                 }
                 finalGridResults.push(reelFinalSymbols);
 
-                // بناء الشريط الجديد الممتد
                 generateReelStrip(stripElement, reelFinalSymbols);
-                stripElement.classList.add('blur-motion');
 
-                // حساب مسافة التحرك العمودي للأعلى لإظهار آخر 4 عناصر
                 const travelDistance = -(STRIP_ITEMS_COUNT - VISIBLE_ROWS) * SINGLE_HEIGHT;
 
-                // تشغيل الدوران السلس بفارق توقيت تدريجي بين البكرات (Stagger effect) مثل السلوت الحقيقي
                 setTimeout(() => {
-                    stripElement.style.transition = `transform ${1.8 + (r * 0.2)}s cubic-bezier(0.25, 0.8, 0.1, 1)`;
+                    stripElement.style.transition = `transform ${1.5 + (r * 0.2)}s cubic-bezier(0.25, 1, 0.2, 1)`;
                     stripElement.style.transform = `translateY(${travelDistance}px)`;
                 }, 50);
             }
 
-            // إيقاف الدوران وعرض النتيجة الإجمالية بعد انتهاء آخر بكرة (تقريباً 3 ثوانٍ)
             setTimeout(() => {
-                for (let r = 1; r <= 5; r++) {
-                    document.getElementById(`strip${r}`).classList.remove('blur-motion');
-                }
+                // إيقاف صوت التدوير فوراً عند توقف البكرات
+                clearInterval(spinSoundInterval);
 
-                // دالة فحص الفوز البسيطة (إذا تكرر الرمز 3 مرات أو أكثر في الواجهة يربح)
                 let winReward = 0;
                 const flatResults = finalGridResults.flat();
                 const counts = {};
-                
                 flatResults.forEach(sym => { counts[sym] = (counts[sym] || 0) + 1; });
 
-                // قواعد الربح الاحتفالية:
-                if (counts['🔥7'] >= 3) winReward += 100;
-                if (counts['WILD'] >= 3) winReward += 80;
-                if (counts['💰'] >= 4) winReward += 50;
-                if (counts['💎'] >= 4) winReward += 40;
+                if (counts['🔥7'] >= 5) winReward += 200;
+                else if (counts['🔥7'] >= 3) winReward += 50;
 
-                // إذا طلع تكرار لأي فاكهة عادية أكثر من 4 مرات
+                if (counts['💎'] >= 5) winReward += 150;
+                else if (counts['💎'] >= 3) winReward += 40;
+
+                if (counts['WILD'] >= 5) winReward += 100;
+                if (counts['💰'] >= 5) winReward += 80;
+
                 Object.keys(counts).forEach(key => {
-                    if (counts[key] >= 4 && key !== '🔥7' && key !== 'WILD') {
-                        winReward += 20;
+                    if (counts[key] >= 4 && !winningHighSymbols.includes(key)) {
+                        winReward += 30;
                     }
                 });
 
-                // معالجة النتيجة النهائية للمستخدم
                 if (winReward > 0) {
                     currentBalance += winReward;
-                    messageDisplay.textContent = `فوز ساحق! ربحت +${winReward} د.ع 🎉`;
+                    
+                    // تشغيل موسيقى الفوز السعيدة فوراً!
+                    playWinMelody();
+
+                    let symbolCleanName = luckySymbol === '🔥7' ? 'السبعات النارية' : (luckySymbol === '💎' ? 'الجواهر المشعة' : 'الرموز الفاخرة');
+                    if (isForcedWin) {
+                        messageDisplay.textContent = `جائزة كبرى! تجمعت ${symbolCleanName} سوية وربحت +${winReward} د.ع 🎉`;
+                    } else {
+                        messageDisplay.textContent = `فوز رائع! ربحت +${winReward} د.ع 🎉`;
+                    }
                     messageDisplay.className = 'win-text';
                 } else {
                     messageDisplay.textContent = "حظاً أوفق في السحبة القادمة.";
                     messageDisplay.className = 'loss-text';
                 }
 
-                // تحديث البيانات النهائية وإعادة تشغيل الأزرار
                 balanceDisplay.textContent = currentBalance;
                 spinButtonContainer.classList.remove('disabled-spin');
                 runningSpin = false;
 
-            }, 3000);
+            }, 2700); 
         }
 
-        // انطلاق اللعبة لأول مرة
         initSlotMachine();
     </script>
 </body>
