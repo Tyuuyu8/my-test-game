@@ -40,7 +40,6 @@
             border-radius: 10px;
             border: 4px solid #333;
             margin-bottom: 20px;
-            overflow: hidden;
         }
 
         .reel {
@@ -48,24 +47,14 @@
             height: 100px; 
             background-color: white;
             border-radius: 5px;
-            overflow: hidden; 
-            position: relative;
-        }
-
-        .symbols-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            transition: transform 3s cubic-bezier(.2,.8,.4,.9); 
-        }
-
-        .symbol {
-            height: 100px; 
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+
+        .symbol {
             font-size: 3.5em; 
+            line-height: 1;
         }
 
         #spin-button {
@@ -100,9 +89,9 @@
         </div>
 
         <div class="slot-machine">
-            <div class="reel" id="reel1"><div class="symbols-container"></div></div>
-            <div class="reel" id="reel2"><div class="symbols-container"></div></div>
-            <div class="reel" id="reel3"><div class="symbols-container"></div></div>
+            <div class="reel" id="reel1"><div class="symbol">💰</div></div>
+            <div class="reel" id="reel2"><div class="symbol">🍇</div></div>
+            <div class="reel" id="reel3"><div class="symbol">🍊</div></div>
         </div>
 
         <button id="spin-button" onclick="spin()">إضغط لتجربة حظك</button>
@@ -112,28 +101,16 @@
     <script>
         const SYMBOLS = ['🍒', '🍋', '🍊', '🍇', '⭐', '💰'];
         const SPIN_COST = 10; 
-        const SYMBOL_HEIGHT = 100; 
-        const NUM_SYMBOLS_PER_REEL = 10; 
-
         let balance = 100; 
         let isSpinning = false; 
 
         const balanceEl = document.getElementById('balance');
         const messageEl = document.getElementById('message');
         const spinButton = document.getElementById('spin-button');
-
-        function initReels() {
-            const reels = document.querySelectorAll('.symbols-container');
-            reels.forEach(reel => {
-                let html = '';
-                for (let i = 0; i < NUM_SYMBOLS_PER_REEL; i++) {
-                    const randomSymbol = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-                    html += `<div class="symbol">${randomSymbol}</div>`;
-                }
-                reel.innerHTML = html;
-                reel.style.transform = 'translateY(0px)';
-            });
-        }
+        
+        const reel1 = document.getElementById('reel1');
+        const reel2 = document.getElementById('reel2');
+        const reel3 = document.getElementById('reel3');
 
         function spin() {
             if (isSpinning) return; 
@@ -144,77 +121,63 @@
                 return;
             }
 
+            // بدء التدوير وخصم النقاط
             isSpinning = true;
             balance -= SPIN_COST;
-            updateUI();
+            balanceEl.textContent = balance;
             spinButton.disabled = true;
             messageEl.textContent = "جاري تدوير البكرات...";
             messageEl.className = '';
 
-            const results = []; 
+            // تأثير الخلط السريع (شغال على كل الموبايلات بدون تعليق)
+            let counter = 0;
+            const interval = setInterval(() => {
+                reel1.innerHTML = `<div class="symbol">${SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)]}</div>`;
+                reel2.innerHTML = `<div class="symbol">${SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)]}</div>`;
+                reel3.innerHTML = `<div class="symbol">${SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)]}</div>`;
+                counter++;
 
-            for (let i = 1; i <= 3; i++) {
-                const reelContainer = document.querySelector(`#reel${i} .symbols-container`);
-                reelContainer.style.transition = 'none';
-                reelContainer.style.transform = 'translateY(0px)';
-                
-                const finalSymbolIndex = Math.floor(Math.random() * SYMBOLS.length);
-                const finalSymbol = SYMBOLS[finalSymbolIndex]; // تم تعديلها هنا بشكل صحيح مية بالمية
-                results.push(finalSymbol);
+                // يتوقف الخلط بعد ثانية ونص ويظهر الناتج النهائي
+                if (counter > 15) { 
+                    clearInterval(interval);
 
-                let animationHtml = '';
-                for (let j = 0; j < NUM_SYMBOLS_PER_REEL - 1; j++) {
-                    const randomSymbol = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-                    animationHtml += `<div class="symbol">${randomSymbol}</div>`;
+                    // نواتج عشوائية نهائية
+                    const res1 = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+                    const res2 = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+                    const res3 = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+
+                    reel1.innerHTML = `<div class="symbol">${res1}</div>`;
+                    reel2.innerHTML = `<div class="symbol">${res2}</div>`;
+                    reel3.innerHTML = `<div class="symbol">${res3}</div>`;
+
+                    // حساب الفوز
+                    let winAmount = 0;
+                    if (res1 === '💰' && res2 === '💰' && res3 === '💰') {
+                        winAmount = 100;
+                    } else if (res1 === '⭐' && res2 === '⭐' && res3 === '⭐') {
+                        winAmount = 50;
+                    } else if (res1 === res2 && res2 === res3) {
+                        winAmount = 25;
+                    } else if (res1 === '🍒' && res2 === '🍒') {
+                        winAmount = 5;
+                    }
+
+                    if (winAmount > 0) {
+                        balance += winAmount;
+                        messageEl.textContent = `مبروك! فزت بـ ${winAmount} نقطة! 🎉`;
+                        messageEl.className = 'win';
+                    } else {
+                        messageEl.textContent = "حظاً أوفق في المرة القادمة.";
+                        messageEl.className = 'loss';
+                    }
+
+                    // تحديث الواجهة وإرجاع الزر
+                    balanceEl.textContent = balance;
+                    spinButton.disabled = false;
+                    isSpinning = false;
                 }
-                animationHtml += `<div class="symbol">${finalSymbol}</div>`;
-                reelContainer.innerHTML = animationHtml;
-
-                setTimeout(() => {
-                    reelContainer.style.transition = 'transform 3s cubic-bezier(.2,.8,.4,.9)';
-                    const translateY = -(NUM_SYMBOLS_PER_REEL - 1) * SYMBOL_HEIGHT;
-                    reelContainer.style.transform = `translateY(${translateY}px)`;
-                }, 50);
-            }
-
-            setTimeout(() => {
-                isSpinning = false;
-                spinButton.disabled = false;
-                calculateWin(results);
-            }, 3050);
+            }, 100); // يغير الايموجي كل 100 ملي ثانية
         }
-
-        function calculateWin(results) {
-            const [s1, s2, s3] = results;
-            let winAmount = 0;
-
-            if (s1 === '💰' && s2 === '💰' && s3 === '💰') {
-                winAmount = 100;
-            } else if (s1 === '⭐' && s2 === '⭐' && s3 === '⭐') {
-                winAmount = 50;
-            } else if (s1 === s2 && s2 === s3) {
-                winAmount = 25;
-            } else if (s1 === '🍒' && s2 === '🍒') {
-                winAmount = 5;
-            }
-
-            if (winAmount > 0) {
-                balance += winAmount;
-                messageEl.textContent = `مبروك! فزت بـ ${winAmount} نقطة! 🎉`;
-                messageEl.className = 'win';
-            } else {
-                messageEl.textContent = "حظاً أوفق في المرة القادمة.";
-                messageEl.className = 'loss';
-            }
-            updateUI();
-        }
-
-        function updateUI() {
-            balanceEl.textContent = balance;
-        }
-
-        initReels();
-        updateUI();
     </script>
 </body>
 </html>
