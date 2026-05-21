@@ -40,21 +40,41 @@
             border-radius: 10px;
             border: 4px solid #333;
             margin-bottom: 20px;
+            overflow: hidden; /* يخفي باقي الفواكه اللي تفتر فوق وتحت */
         }
 
         .reel {
             width: 75px;
-            height: 100px; 
+            height: 100px; /* يعرض فاكهة واحدة فقط في كل بكرة */
             background-color: white;
             border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .symbols-strip {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
             display: flex;
-            justify-content: center;
-            align-items: center;
+            flex-direction: column;
+            /* أنيميشن دوران ناعم جداً يبطئ بالنهاية بشكل واقعي */
+            transition: transform 2.5s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
 
         .symbol {
+            height: 100px; /* يطابق ارتفاع البكرة بالضبط */
+            display: flex;
+            justify-content: center;
+            align-items: center;
             font-size: 3.5em; 
             line-height: 1;
+        }
+
+        /* تأثير الغواش/الضبابي أثناء الدوران السريع ليعطي واقعية */
+        .blur-effect {
+            filter: blur(3px);
         }
 
         #spin-button {
@@ -71,6 +91,7 @@
         }
 
         #spin-button:hover { background-color: #e68a00; }
+        #spin-button:disabled { background-color: #555; cursor: not-allowed; }
 
         #message { margin-top: 15px; font-weight: bold; min-height: 1.2em; }
         .win { color: #4caf50; }
@@ -88,9 +109,9 @@
         </div>
 
         <div class="slot-machine">
-            <div class="reel" id="reel1"><div class="symbol">💰</div></div>
-            <div class="reel" id="reel2"><div class="symbol">🍇</div></div>
-            <div class="reel" id="reel3"><div class="symbol">🍊</div></div>
+            <div class="reel"><div class="symbols-strip" id="strip1"></div></div>
+            <div class="reel"><div class="symbols-strip" id="strip2"></div></div>
+            <div class="reel"><div class="symbols-strip" id="strip3"></div></div>
         </div>
 
         <button id="spin-button" onclick="spin()">إضغط لتجربة حظك</button>
@@ -100,54 +121,132 @@
     <script>
         const SYMBOLS = ['🍒', '🍋', '🍊', '🍇', '⭐', '💰'];
         const SPIN_COST = 10; 
+        const SINGLE_SYMBOL_HEIGHT = 100; // ارتفاع الفاكهة الواحدة بالبكسل
+        const ANIMATION_ITEMS = 20; // عدد الفواكه المتتالية بداخل شريط الدوران لتعطي مظهر الحركة الطويلة
+
         let balance = 100; 
+        let isSpinning = false; 
 
         const balanceEl = document.getElementById('balance');
         const messageEl = document.getElementById('message');
+        const spinButton = document.getElementById('spin-button');
         
-        const reel1 = document.getElementById('reel1');
-        const reel2 = document.getElementById('reel2');
-        const reel3 = document.getElementById('reel3');
+        const strip1 = document.getElementById('strip1');
+        const strip2 = document.getElementById('strip2');
+        const strip3 = document.getElementById('strip3');
+
+        // دالة لبناء شريط طويل من الفواكه العشوائية لكل بكرة عند البداية
+        function createStrip(stripElement, finalSymbol) {
+            let html = '';
+            // نملأ الشريط بفواكه عشوائية تتنقل بينها العين أثناء الحركة
+            for (let i = 0; i < ANIMATION_ITEMS - 1; i++) {
+                const randomSymbol = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+                html += `<div class="symbol">${randomSymbol}</div>`;
+            }
+            // نضع الفاكهة المستهدفة (النتيجة الحقيقية) في نهاية الشريط تماماً
+            html += `<div class="symbol">${finalSymbol}</div>`;
+            stripElement.innerHTML = html;
+        }
+
+        // تهيئة اللعبة عند تشغيل الصفحة لأول مرة بأشكال ثابتة
+        function initGame() {
+            createStrip(strip1, '💰');
+            createStrip(strip2, '🍇');
+            createStrip(strip3, '🍊');
+        }
 
         function spin() {
+            if (isSpinning) return; 
+
             if (balance < SPIN_COST) {
                 messageEl.textContent = "عفواً، ليس لديك نقاط كافية!";
                 messageEl.className = 'loss';
                 return;
             }
 
+            isSpinning = true;
             balance -= SPIN_COST;
+            balanceEl.textContent = balance;
+            spinButton.disabled = true;
+            messageEl.textContent = "جاري سحب الذراع...";
+            messageEl.className = '';
 
+            // 1. تحديد النواتج النهائية عشوائياً خلف الكواليس
             const res1 = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
             const res2 = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
             const res3 = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
 
-            reel1.innerHTML = `<div class="symbol">${res1}</div>`;
-            reel2.innerHTML = `<div class="symbol">${res2}</div>`;
-            reel3.innerHTML = `<div class="symbol">${res3}</div>`;
+            // 2. إعادة بناء الأشرطة لتنتهي بالنواتج الجديدة وتصفير موقعها عمودياً
+            strip1.style.transition = 'none';
+            strip2.style.transition = 'none';
+            strip3.style.transition = 'none';
+            
+            strip1.style.transform = 'translateY(0px)';
+            strip2.style.transform = 'translateY(0px)';
+            strip3.style.transform = 'translateY(0px)';
 
-            let winAmount = 0;
-            if (res1 === '💰' && res2 === '💰' && res3 === '💰') {
-                winAmount = 100;
-            } else if (res1 === '⭐' && res2 === '⭐' && res3 === '⭐') {
-                winAmount = 50;
-            } else if (res1 === res2 && res2 === res3) {
-                winAmount = 25;
-            } else if (res1 === '🍒' && res2 === '🍒') {
-                winAmount = 5;
-            }
+            createStrip(strip1, res1);
+            createStrip(strip2, res2);
+            createStrip(strip3, res3);
 
-            if (winAmount > 0) {
-                balance += winAmount;
-                messageEl.textContent = `مبروك! فزت بـ ${winAmount} نقطة! 🎉`;
-                messageEl.className = 'win';
-            } else {
-                messageEl.textContent = "حظاً أوفق في المرة القادمة.";
-                messageEl.className = 'loss';
-            }
+            // إضافة تأثير الغواش (Blur) للحركة السريعة
+            strip1.classList.add('blur-effect');
+            strip2.classList.add('blur-effect');
+            strip3.classList.add('blur-effect');
 
-            balanceEl.textContent = balance;
+            // 3. تشغيل حركة السحب والتدوير العمودي السلس (بفارق توقيت زغير بين بكرة وبكرة مثل الأصلي)
+            const travelDistance = -(ANIMATION_ITEMS - 1) * SINGLE_SYMBOL_HEIGHT;
+
+            setTimeout(() => {
+                strip1.style.transition = 'transform 2s cubic-bezier(0.1, 0.8, 0.3, 1)';
+                strip1.style.transform = `translateY(${travelDistance}px)`;
+            }, 50);
+
+            setTimeout(() => {
+                strip2.style.transition = 'transform 2.3s cubic-bezier(0.1, 0.8, 0.3, 1)';
+                strip2.style.transform = `translateY(${travelDistance}px)`;
+            }, 200);
+
+            setTimeout(() => {
+                strip3.style.transition = 'transform 2.6s cubic-bezier(0.1, 0.8, 0.3, 1)';
+                strip3.style.transform = `translateY(${travelDistance}px)`;
+            }, 400);
+
+            // 4. إيقاف الحركة وعرض النتيجة بعد انتهاء الأنيميشن بالكامل
+            setTimeout(() => {
+                // إزالة تأثير الغواش عند التوقف
+                strip1.classList.remove('blur-effect');
+                strip2.classList.remove('blur-effect');
+                strip3.classList.remove('blur-effect');
+
+                // حساب النتيجة
+                let winAmount = 0;
+                if (res1 === '💰' && res2 === '💰' && res3 === '💰') {
+                    winAmount = 100;
+                } else if (res1 === '⭐' && res2 === '⭐' && res3 === '⭐') {
+                    winAmount = 50;
+                } else if (res1 === res2 && res2 === res3) {
+                    winAmount = 25;
+                } else if (res1 === '🍒' && res2 === '🍒') {
+                    winAmount = 5;
+                }
+
+                if (winAmount > 0) {
+                    balance += winAmount;
+                    messageEl.textContent = `مبروك! فزت بـ ${winAmount} نقطة! 🎉`;
+                    messageEl.className = 'win';
+                } else {
+                    messageEl.textContent = "حظاً أوفق في المرة القادمة.";
+                    messageEl.className = 'loss';
+                }
+
+                balanceEl.textContent = balance;
+                spinButton.disabled = false;
+                isSpinning = false;
+            }, 3000); // 3 ثوانٍ كافية لانتهاء تدوير آخر بكرة
         }
+
+        initGame();
     </script>
 </body>
 </html>
