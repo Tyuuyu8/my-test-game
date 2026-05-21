@@ -159,7 +159,7 @@
                 reelContainer.style.transform = 'translateY(0px)';
                 
                 const finalSymbolIndex = Math.floor(Math.random() * SYMBOLS.length);
-                const finalSymbol = SYMBOLS[finalSymbolIndex]; // هنا تم تصليح الخطأ البرمجي
+                const finalSymbol = SYMBOLS[finalSymbolIndex]; // تم تعديلها هنا بشكل صحيح مية بالمية
                 results.push(finalSymbol);
 
                 let animationHtml = '';
