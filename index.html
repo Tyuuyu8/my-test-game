@@ -3,53 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اربح بدون ايداع - ماكنة الحظ</title>
+    <title>اربح بدون ايداع - Lucky Streak</title>
     <style>
+        /* تصميم الخلفية النارية العامة */
         body {
-            background-color: #121212;
+            background: radial-gradient(circle, #4a0000 0%, #150000 100%);
             color: white;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
+            overflow-x: hidden;
         }
 
-        .game-container {
-            text-align: center;
-            background-color: #1e1e1e;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-            width: 90%;
-            max-width: 350px;
+        /* حاوية اللعبة الشاشة الكاملة المحاكية للموبايل بالعرض */
+        .game-screen {
+            width: 100%;
+            max-width: 480px; /* تصميم طولي متناسق مع الموبايل وبداخله السلوت العريض */
+            background: #000;
+            border: 4px solid #3a0000;
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: 0 0 30px rgba(255, 61, 0, 0.4);
+            position: relative;
+            background-image: linear-gradient(to bottom, rgba(0,0,0,0.8), rgba(40,0,0,0.6)), url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M50 15 C30 40 30 60 50 95 C70 60 70 40 50 15 Z" fill="%23ff3d00" opacity="0.05"/></svg>');
         }
 
-        h1 { color: #ff9800; margin-bottom: 5px; font-size: 1.8em; }
-
-        .status-panel { background: #2a2a2a; padding: 10px; border-radius: 8px; margin-bottom: 20px; }
-        #balance { font-weight: bold; color: #4caf50; font-size: 1.3em; }
-        .cost-text { color: #aaa; font-size: 0.9em; margin: 5px 0 0 0; }
-
-        .slot-machine {
+        /* الشريط العلوي للرصيد */
+        .top-navbar {
             display: flex;
             justify-content: space-between;
-            background-color: #000;
-            padding: 15px;
-            border-radius: 10px;
-            border: 4px solid #333;
-            margin-bottom: 20px;
-            overflow: hidden; /* يخفي باقي الفواكه اللي تفتر فوق وتحت */
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .game-title {
+            font-size: 1.4em;
+            color: #ffd700;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff3d00, 0 0 5px #ffeb3b;
+            font-style: italic;
+        }
+        .balance-box {
+            background: linear-gradient(180deg, #222 0%, #111 100%);
+            border: 2px solid #ffd700;
+            border-radius: 8px;
+            padding: 5px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .balance-value {
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .plus-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 20px;
+            height: 20px;
+            font-weight: bold;
+            cursor: pointer;
         }
 
-        .reel {
-            width: 75px;
-            height: 100px; /* يعرض فاكهة واحدة فقط في كل بكرة */
-            background-color: white;
-            border-radius: 5px;
+        /* ماكينة السلوت - الإطار الذهبي الناري */
+        .slot-machine-frame {
+            border: 4px solid #ff9800;
+            border-radius: 12px;
+            background: #111;
+            padding: 8px;
+            box-shadow: 0 0 20px #ff3d00, inset 0 0 15px #000;
+            display: flex;
+            justify-content: space-between;
+            gap: 4px;
             overflow: hidden;
             position: relative;
+        }
+
+        /* البكرات الـ 5 */
+        .reel {
+            flex: 1;
+            height: 240px; /* يعرض 4 صفوف (كل صف 60px) */
+            background: linear-gradient(180deg, #151515 0%, #050505 50%, #151515 100%);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            border-right: 1px solid #222;
         }
 
         .symbols-strip {
@@ -59,194 +102,292 @@
             width: 100%;
             display: flex;
             flex-direction: column;
-            /* أنيميشن دوران ناعم جداً يبطئ بالنهاية بشكل واقعي */
-            transition: transform 2.5s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
 
+        /* الرموز والـ 7️⃣ النارية */
         .symbol {
-            height: 100px; /* يطابق ارتفاع البكرة بالضبط */
+            height: 60px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 3.5em; 
-            line-height: 1;
+            font-size: 2em;
+            text-shadow: 0 0 8px rgba(255,255,255,0.5);
+            box-sizing: border-box;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
         }
-
-        /* تأثير الغواش/الضبابي أثناء الدوران السريع ليعطي واقعية */
-        .blur-effect {
-            filter: blur(3px);
-        }
-
-        #spin-button {
-            background-color: #ff9800;
-            color: #121212;
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.2em;
+        
+        .symbol.seven {
+            color: #ff3d00;
             font-weight: bold;
-            border-radius: 30px;
-            cursor: pointer;
-            width: 100%;
-            transition: background-color 0.3s;
+            text-shadow: 0 0 10px #ff3d00, 0 0 5px #ffd700;
+            animation: pulse 1s infinite alternate;
         }
 
-        #spin-button:hover { background-color: #e68a00; }
-        #spin-button:disabled { background-color: #555; cursor: not-allowed; }
+        .blur-motion {
+            filter: blur(2px);
+        }
 
-        #message { margin-top: 15px; font-weight: bold; min-height: 1.2em; }
-        .win { color: #4caf50; }
-        .loss { color: #f44336; }
+        /* شريط التحكم السفلي والأزرار */
+        .controls-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+            gap: 15px;
+        }
+
+        /* زر SPIN الدائري الكبير الاحترافي */
+        .spin-outer-ring {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff9800 0%, #ff3d00 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 20px #ff3d00, 0 5px 15px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: transform 0.1s, filter 0.2s;
+        }
+        .spin-outer-ring:active {
+            transform: scale(0.95);
+        }
+        .spin-inner-circle {
+            width: 74px;
+            height: 74px;
+            border-radius: 50%;
+            background: #fff;
+            color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            letter-spacing: 1px;
+            border: 3px solid #111;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+        }
+        
+        .disabled-spin {
+            background: #555 !important;
+            box-shadow: none !important;
+            cursor: not-allowed;
+        }
+        .disabled-spin .spin-inner-circle {
+            background: #aaa;
+            color: #555;
+        }
+
+        /* لوحة البيانات السفلية المتكاملة */
+        .bottom-info-bar {
+            width: 100%;
+            background: rgba(0,0,0,0.6);
+            border-top: 1px solid #333;
+            padding: 8px 5px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8em;
+            color: #aaa;
+            border-radius: 5px;
+        }
+        .info-item span {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        #message-display {
+            font-weight: bold;
+            text-align: center;
+            min-height: 1.5em;
+            font-size: 1.1em;
+            margin-top: 5px;
+        }
+        .win-text { color: #4caf50; text-shadow: 0 0 10px rgba(76,175,80,0.5); }
+        .loss-text { color: #f44336; }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.08); }
+        }
     </style>
 </head>
 <body>
 
-    <div class="game-container">
-        <h1>اربح بدون ايداع</h1>
-        
-        <div class="status-panel">
-            <p style="margin:0;">رصيدك الحالي: <span id="balance">100</span> نقطة</p>
-            <p class="cost-text">تكلفة اللفة: 10 نقاط</p>
+    <div class="game-screen">
+        <div class="top-navbar">
+            <div class="game-title">Lucky Streak 🔥</div>
+            <div class="balance-box">
+                <span style="color:#ffd700; font-size:0.8em;">د.ع</span>
+                <span class="balance-value" id="user-balance">1000</span>
+                <button class="plus-btn">+</button>
+            </div>
         </div>
 
-        <div class="slot-machine">
+        <div class="slot-machine-frame">
             <div class="reel"><div class="symbols-strip" id="strip1"></div></div>
             <div class="reel"><div class="symbols-strip" id="strip2"></div></div>
             <div class="reel"><div class="symbols-strip" id="strip3"></div></div>
+            <div class="reel"><div class="symbols-strip" id="strip4"></div></div>
+            <div class="reel"><div class="symbols-strip" id="strip5"></div></div>
         </div>
 
-        <button id="spin-button" onclick="spin()">إضغط لتجربة حظك</button>
-        <p id="message"></p>
+        <div id="message-display">تحجّج بحظك واضغط لتدوير النار!</div>
+
+        <div class="controls-panel">
+            <div class="spin-outer-ring" id="spin-btn-container" onclick="startSpin()">
+                <div class="spin-inner-circle">SPIN</div>
+            </div>
+
+            <div class="bottom-info-bar">
+                <div class="info-item">BET: <span id="bet-val">10</span></div>
+                <div class="info-item">LINES: <span>10</span></div>
+                <div class="info-item">COIN VALUE: <span>$0.01</span></div>
+            </div>
+        </div>
     </div>
 
     <script>
-        const SYMBOLS = ['🍒', '🍋', '🍊', '🍇', '⭐', '💰'];
-        const SPIN_COST = 10; 
-        const SINGLE_SYMBOL_HEIGHT = 100; // ارتفاع الفاكهة الواحدة بالبكسل
-        const ANIMATION_ITEMS = 20; // عدد الفواكه المتتالية بداخل شريط الدوران لتعطي مظهر الحركة الطويلة
+        // الرموز الفاخرة؛ الـ 7️⃣ هي رمز الجائزة الكبرى
+        const SYMBOLS_POOL = ['🔥7', '🍒', '🍋', '🍊', '🍇', '💎', '💰', 'WILD'];
+        const SPIN_COST = 10;
+        const SINGLE_HEIGHT = 60; // ارتفاع الرمز بالبكسل
+        const VISIBLE_ROWS = 4;   // عدد الصفوف الظاهرة
+        const STRIP_ITEMS_COUNT = 30; // طول شريط الأنيميشن
 
-        let balance = 100; 
-        let isSpinning = false; 
+        let currentBalance = 1000;
+        let runningSpin = false;
 
-        const balanceEl = document.getElementById('balance');
-        const messageEl = document.getElementById('message');
-        const spinButton = document.getElementById('spin-button');
-        
-        const strip1 = document.getElementById('strip1');
-        const strip2 = document.getElementById('strip2');
-        const strip3 = document.getElementById('strip3');
+        const balanceDisplay = document.getElementById('user-balance');
+        const messageDisplay = document.getElementById('message-display');
+        const spinButtonContainer = document.getElementById('spin-btn-container');
 
-        // دالة لبناء شريط طويل من الفواكه العشوائية لكل بكرة عند البداية
-        function createStrip(stripElement, finalSymbol) {
+        // دالة لإنشاء شريط الرموز الممتد عمودياً لكل بكرة
+        function generateReelStrip(targetStrip, finalFourSymbols) {
             let html = '';
-            // نملأ الشريط بفواكه عشوائية تتنقل بينها العين أثناء الحركة
-            for (let i = 0; i < ANIMATION_ITEMS - 1; i++) {
-                const randomSymbol = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-                html += `<div class="symbol">${randomSymbol}</div>`;
+            // نملأ أول الشريط برموز عشوائية للحركة السريعة
+            for (let i = 0; i < STRIP_ITEMS_COUNT - VISIBLE_ROWS; i++) {
+                const randSym = SYMBOLS_POOL[Math.floor(Math.random() * SYMBOLS_POOL.length)];
+                if (randSym === '🔥7') {
+                    html += `<div class="symbol seven">7</div>`;
+                } else {
+                    html += `<div class="symbol">${randSym}</div>`;
+                }
             }
-            // نضع الفاكهة المستهدفة (النتيجة الحقيقية) في نهاية الشريط تماماً
-            html += `<div class="symbol">${finalSymbol}</div>`;
-            stripElement.innerHTML = html;
+            // نضع الـ 4 رموز النهائية المستهدفة في آخر الشريط
+            finalFourSymbols.forEach(sym => {
+                if (sym === '🔥7') {
+                    html += `<div class="symbol seven">7</div>`;
+                } else {
+                    html += `<div class="symbol">${sym}</div>`;
+                }
+            });
+            targetStrip.innerHTML = html;
         }
 
-        // تهيئة اللعبة عند تشغيل الصفحة لأول مرة بأشكال ثابتة
-        function initGame() {
-            createStrip(strip1, '💰');
-            createStrip(strip2, '🍇');
-            createStrip(strip3, '🍊');
+        // تهيئة البكرات الـ 5 عند فتح الصفحة بأشكال افتراضية ثابته
+        function initSlotMachine() {
+            for (let r = 1; r <= 5; r++) {
+                const stripElement = document.getElementById(`strip${r}`);
+                const defaultSymbols = ['🔥7', '🍒', '🍋', '🍊'];
+                generateReelStrip(stripElement, defaultSymbols);
+                stripElement.style.transform = 'translateY(0px)';
+            }
         }
 
-        function spin() {
-            if (isSpinning) return; 
+        function startSpin() {
+            if (runningSpin) return;
 
-            if (balance < SPIN_COST) {
-                messageEl.textContent = "عفواً، ليس لديك نقاط كافية!";
-                messageEl.className = 'loss';
+            if (currentBalance < SPIN_COST) {
+                messageDisplay.textContent = "عفواً، رصيدك لا يكفي للعب!";
+                messageDisplay.className = 'loss-text';
                 return;
             }
 
-            isSpinning = true;
-            balance -= SPIN_COST;
-            balanceEl.textContent = balance;
-            spinButton.disabled = true;
-            messageEl.textContent = "جاري سحب الذراع...";
-            messageEl.className = '';
+            // سحب الرصيد وتحديث الواجهة وقفل الزر
+            runningSpin = true;
+            currentBalance -= SPIN_COST;
+            balanceDisplay.textContent = currentBalance;
+            spinButtonContainer.classList.add('disabled-spin');
+            messageDisplay.textContent = "جاري تدوير بكرات الحظ... 🔥";
+            messageDisplay.className = '';
 
-            // 1. تحديد النواتج النهائية عشوائياً خلف الكواليس
-            const res1 = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-            const res2 = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-            const res3 = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+            // مصفوفة لحفظ النواتج النهائية الـ 4 لكل بكرة من البكرات الـ 5
+            const finalGridResults = [];
 
-            // 2. إعادة بناء الأشرطة لتنتهي بالنواتج الجديدة وتصفير موقعها عمودياً
-            strip1.style.transition = 'none';
-            strip2.style.transition = 'none';
-            strip3.style.transition = 'none';
-            
-            strip1.style.transform = 'translateY(0px)';
-            strip2.style.transform = 'translateY(0px)';
-            strip3.style.transform = 'translateY(0px)';
+            for (let r = 1; r <= 5; r++) {
+                const stripElement = document.getElementById(`strip${r}`);
+                
+                // صيانة المسار وتصفير الأنيميشن فوراً بدون تأثير بصري متأخر
+                stripElement.style.transition = 'none';
+                stripElement.style.transform = 'translateY(0px)';
 
-            createStrip(strip1, res1);
-            createStrip(strip2, res2);
-            createStrip(strip3, res3);
+                // اختيار 4 رموز عشوائية نهائية لهذه البكرة
+                const reelFinalSymbols = [];
+                for (let row = 0; row < VISIBLE_ROWS; row++) {
+                    reelFinalSymbols.push(SYMBOLS_POOL[Math.floor(Math.random() * SYMBOLS_POOL.length)]);
+                }
+                finalGridResults.push(reelFinalSymbols);
 
-            // إضافة تأثير الغواش (Blur) للحركة السريعة
-            strip1.classList.add('blur-effect');
-            strip2.classList.add('blur-effect');
-            strip3.classList.add('blur-effect');
+                // بناء الشريط الجديد الممتد
+                generateReelStrip(stripElement, reelFinalSymbols);
+                stripElement.classList.add('blur-motion');
 
-            // 3. تشغيل حركة السحب والتدوير العمودي السلس (بفارق توقيت زغير بين بكرة وبكرة مثل الأصلي)
-            const travelDistance = -(ANIMATION_ITEMS - 1) * SINGLE_SYMBOL_HEIGHT;
+                // حساب مسافة التحرك العمودي للأعلى لإظهار آخر 4 عناصر
+                const travelDistance = -(STRIP_ITEMS_COUNT - VISIBLE_ROWS) * SINGLE_HEIGHT;
 
+                // تشغيل الدوران السلس بفارق توقيت تدريجي بين البكرات (Stagger effect) مثل السلوت الحقيقي
+                setTimeout(() => {
+                    stripElement.style.transition = `transform ${1.8 + (r * 0.2)}s cubic-bezier(0.25, 0.8, 0.1, 1)`;
+                    stripElement.style.transform = `translateY(${travelDistance}px)`;
+                }, 50);
+            }
+
+            // إيقاف الدوران وعرض النتيجة الإجمالية بعد انتهاء آخر بكرة (تقريباً 3 ثوانٍ)
             setTimeout(() => {
-                strip1.style.transition = 'transform 2s cubic-bezier(0.1, 0.8, 0.3, 1)';
-                strip1.style.transform = `translateY(${travelDistance}px)`;
-            }, 50);
-
-            setTimeout(() => {
-                strip2.style.transition = 'transform 2.3s cubic-bezier(0.1, 0.8, 0.3, 1)';
-                strip2.style.transform = `translateY(${travelDistance}px)`;
-            }, 200);
-
-            setTimeout(() => {
-                strip3.style.transition = 'transform 2.6s cubic-bezier(0.1, 0.8, 0.3, 1)';
-                strip3.style.transform = `translateY(${travelDistance}px)`;
-            }, 400);
-
-            // 4. إيقاف الحركة وعرض النتيجة بعد انتهاء الأنيميشن بالكامل
-            setTimeout(() => {
-                // إزالة تأثير الغواش عند التوقف
-                strip1.classList.remove('blur-effect');
-                strip2.classList.remove('blur-effect');
-                strip3.classList.remove('blur-effect');
-
-                // حساب النتيجة
-                let winAmount = 0;
-                if (res1 === '💰' && res2 === '💰' && res3 === '💰') {
-                    winAmount = 100;
-                } else if (res1 === '⭐' && res2 === '⭐' && res3 === '⭐') {
-                    winAmount = 50;
-                } else if (res1 === res2 && res2 === res3) {
-                    winAmount = 25;
-                } else if (res1 === '🍒' && res2 === '🍒') {
-                    winAmount = 5;
+                for (let r = 1; r <= 5; r++) {
+                    document.getElementById(`strip${r}`).classList.remove('blur-motion');
                 }
 
-                if (winAmount > 0) {
-                    balance += winAmount;
-                    messageEl.textContent = `مبروك! فزت بـ ${winAmount} نقطة! 🎉`;
-                    messageEl.className = 'win';
+                // دالة فحص الفوز البسيطة (إذا تكرر الرمز 3 مرات أو أكثر في الواجهة يربح)
+                let winReward = 0;
+                const flatResults = finalGridResults.flat();
+                const counts = {};
+                
+                flatResults.forEach(sym => { counts[sym] = (counts[sym] || 0) + 1; });
+
+                // قواعد الربح الاحتفالية:
+                if (counts['🔥7'] >= 3) winReward += 100;
+                if (counts['WILD'] >= 3) winReward += 80;
+                if (counts['💰'] >= 4) winReward += 50;
+                if (counts['💎'] >= 4) winReward += 40;
+
+                // إذا طلع تكرار لأي فاكهة عادية أكثر من 4 مرات
+                Object.keys(counts).forEach(key => {
+                    if (counts[key] >= 4 && key !== '🔥7' && key !== 'WILD') {
+                        winReward += 20;
+                    }
+                });
+
+                // معالجة النتيجة النهائية للمستخدم
+                if (winReward > 0) {
+                    currentBalance += winReward;
+                    messageDisplay.textContent = `فوز ساحق! ربحت +${winReward} د.ع 🎉`;
+                    messageDisplay.className = 'win-text';
                 } else {
-                    messageEl.textContent = "حظاً أوفق في المرة القادمة.";
-                    messageEl.className = 'loss';
+                    messageDisplay.textContent = "حظاً أوفق في السحبة القادمة.";
+                    messageDisplay.className = 'loss-text';
                 }
 
-                balanceEl.textContent = balance;
-                spinButton.disabled = false;
-                isSpinning = false;
-            }, 3000); // 3 ثوانٍ كافية لانتهاء تدوير آخر بكرة
+                // تحديث البيانات النهائية وإعادة تشغيل الأزرار
+                balanceDisplay.textContent = currentBalance;
+                spinButtonContainer.classList.remove('disabled-spin');
+                runningSpin = false;
+
+            }, 3000);
         }
 
-        initGame();
+        // انطلاق اللعبة لأول مرة
+        initSlotMachine();
     </script>
 </body>
 </html>
