@@ -116,20 +116,16 @@
                 return;
             }
 
-            // خصم النقاط فوراً من الضغطة
             balance -= SPIN_COST;
 
-            // توليد الأشكال عشوائياً وبنفس الفيمتو ثانية
             const res1 = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
             const res2 = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
             const res3 = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
 
-            // تبديل الفواكه على الشاشة فوراً
             reel1.innerHTML = `<div class="symbol">${res1}</div>`;
             reel2.innerHTML = `<div class="symbol">${res2}</div>`;
             reel3.innerHTML = `<div class="symbol">${res3}</div>`;
 
-            // حساب الربح والخسارة
             let winAmount = 0;
             if (res1 === '💰' && res2 === '💰' && res3 === '💰') {
                 winAmount = 100;
@@ -150,7 +146,6 @@
                 messageEl.className = 'loss';
             }
 
-            // تحديث رصيد الشاشة
             balanceEl.textContent = balance;
         }
     </script>
