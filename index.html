@@ -40,7 +40,6 @@
             border-radius: 10px;
             border: 4px solid #333;
             margin-bottom: 20px;
-            overflow: hidden;
         }
 
         .reel {
@@ -48,24 +47,14 @@
             height: 100px; 
             background-color: white;
             border-radius: 5px;
-            overflow: hidden; 
-            position: relative;
-        }
-
-        .symbols-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            transition: transform 3s cubic-bezier(.2,.8,.4,.9); 
-        }
-
-        .symbol {
-            height: 100px; 
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+
+        .symbol {
             font-size: 3.5em; 
+            line-height: 1;
         }
 
         #spin-button {
@@ -82,7 +71,6 @@
         }
 
         #spin-button:hover { background-color: #e68a00; }
-        #spin-button:disabled { background-color: #555; cursor: not-allowed; }
 
         #message { margin-top: 15px; font-weight: bold; min-height: 1.2em; }
         .win { color: #4caf50; }
@@ -100,9 +88,9 @@
         </div>
 
         <div class="slot-machine">
-            <div class="reel" id="reel1"><div class="symbols-container"></div></div>
-            <div class="reel" id="reel2"><div class="symbols-container"></div></div>
-            <div class="reel" id="reel3"><div class="symbols-container"></div></div>
+            <div class="reel" id="reel1"><div class="symbol">💰</div></div>
+            <div class="reel" id="reel2"><div class="symbol">🍇</div></div>
+            <div class="reel" id="reel3"><div class="symbol">🍊</div></div>
         </div>
 
         <button id="spin-button" onclick="spin()">إضغط لتجربة حظك</button>
@@ -112,89 +100,44 @@
     <script>
         const SYMBOLS = ['🍒', '🍋', '🍊', '🍇', '⭐', '💰'];
         const SPIN_COST = 10; 
-        const SYMBOL_HEIGHT = 100; 
-        const NUM_SYMBOLS_PER_REEL = 10; 
-
         let balance = 100; 
-        let isSpinning = false; 
 
         const balanceEl = document.getElementById('balance');
         const messageEl = document.getElementById('message');
-        const spinButton = document.getElementById('spin-button');
-
-        function initReels() {
-            const reels = document.querySelectorAll('.symbols-container');
-            reels.forEach(reel => {
-                let html = '';
-                for (let i = 0; i < NUM_SYMBOLS_PER_REEL; i++) {
-                    const randomSymbol = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-                    html += `<div class="symbol">${randomSymbol}</div>`;
-                }
-                reel.innerHTML = html;
-                reel.style.transform = 'translateY(0px)';
-            });
-        }
+        
+        const reel1 = document.getElementById('reel1');
+        const reel2 = document.getElementById('reel2');
+        const reel3 = document.getElementById('reel3');
 
         function spin() {
-            if (isSpinning) return; 
-
             if (balance < SPIN_COST) {
                 messageEl.textContent = "عفواً، ليس لديك نقاط كافية!";
                 messageEl.className = 'loss';
                 return;
             }
 
-            isSpinning = true;
+            // خصم النقاط فوراً من الضغطة
             balance -= SPIN_COST;
-            updateUI();
-            spinButton.disabled = true;
-            messageEl.textContent = "جاري تدوير البكرات...";
-            messageEl.className = '';
 
-            const results = []; 
+            // توليد الأشكال عشوائياً وبنفس الفيمتو ثانية
+            const res1 = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+            const res2 = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+            const res3 = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
 
-            for (let i = 1; i <= 3; i++) {
-                const reelContainer = document.querySelector(`#reel${i} .symbols-container`);
-                reelContainer.style.transition = 'none';
-                reelContainer.style.transform = 'translateY(0px)';
-                
-                const finalSymbolIndex = Math.floor(Math.random() * SYMBOLS.length);
-                const finalSymbol = SYMBOLS[finalSymbol];
-                results.push(finalSymbol);
+            // تبديل الفواكه على الشاشة فوراً
+            reel1.innerHTML = `<div class="symbol">${res1}</div>`;
+            reel2.innerHTML = `<div class="symbol">${res2}</div>`;
+            reel3.innerHTML = `<div class="symbol">${res3}</div>`;
 
-                let animationHtml = '';
-                for (let j = 0; j < NUM_SYMBOLS_PER_REEL - 1; j++) {
-                    const randomSymbol = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
-                    animationHtml += `<div class="symbol">${randomSymbol}</div>`;
-                }
-                animationHtml += `<div class="symbol">${finalSymbol}</div>`;
-                reelContainer.innerHTML = animationHtml;
-
-                setTimeout(() => {
-                    reelContainer.style.transition = 'transform 3s cubic-bezier(.2,.8,.4,.9)';
-                    const translateY = -(NUM_SYMBOLS_PER_REEL - 1) * SYMBOL_HEIGHT;
-                    reelContainer.style.transform = `translateY(${translateY}px)`;
-                }, 50);
-            }
-
-            setTimeout(() => {
-                isSpinning = false;
-                spinButton.disabled = false;
-                calculateWin(results);
-            }, 3050);
-        }
-
-        function calculateWin(results) {
-            const [s1, s2, s3] = results;
+            // حساب الربح والخسارة
             let winAmount = 0;
-
-            if (s1 === '💰' && s2 === '💰' && s3 === '💰') {
+            if (res1 === '💰' && res2 === '💰' && res3 === '💰') {
                 winAmount = 100;
-            } else if (s1 === '⭐' && s2 === '⭐' && s3 === '⭐') {
+            } else if (res1 === '⭐' && res2 === '⭐' && res3 === '⭐') {
                 winAmount = 50;
-            } else if (s1 === s2 && s2 === s3) {
+            } else if (res1 === res2 && res2 === res3) {
                 winAmount = 25;
-            } else if (s1 === '🍒' && s2 === '🍒') {
+            } else if (res1 === '🍒' && res2 === '🍒') {
                 winAmount = 5;
             }
 
@@ -206,15 +149,10 @@
                 messageEl.textContent = "حظاً أوفق في المرة القادمة.";
                 messageEl.className = 'loss';
             }
-            updateUI();
-        }
 
-        function updateUI() {
+            // تحديث رصيد الشاشة
             balanceEl.textContent = balance;
         }
-
-        initReels();
-        updateUI();
     </script>
 </body>
 </html>
